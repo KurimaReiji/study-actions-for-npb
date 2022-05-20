@@ -6,14 +6,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      CI_COMMIT_MESSAGE: Continuous Integration Build Artifacts
+      CI_COMMIT_AUTHOR: Continuous Integration
     steps:
       - uses: actions/checkout@v3
-      - name: Run a one-line script
-        run: echo Hello, world!
-      - name: Run a multi-line script
+      - name: TZ=Asia/Taipei date
+        run: TZ=Asia/Taipei date
+      - name: create docs directory
+        run: mkdir -p docs
+      - name: Create JSON file
+        run: echo '["2022-05-20T21:00:00"]' > docs/now.json
+      - name: echo '["2022-05-20T21:00:00"]' > docs/now.json
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
-          echo $PWD
-          echo $HOME
+          git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+          git config --global user.email "${{ secrets.MY_SECRET_EMAIL}}"
+          git add .
+          git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+          git push
