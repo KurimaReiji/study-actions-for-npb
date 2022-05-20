@@ -1,0 +1,30 @@
+name: CI test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CI_COMMIT_MESSAGE: Continuous Integration Build Artifacts
+      CI_COMMIT_AUTHOR: Continuous Integration
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    - name: Create JSON file
+      run: echo "[\"`TZ=Asia/Taipei date -Isecond`\"]" > docs/now.json
+    - name: install puppeteer
+      run: npm i puppeteer
+    - name: get results of today
+      run: node today.mjs && jq '.games' npb-2022-*json | jq -s '.|add' > ../docs/games2022.json
+      working-directory: ./gamelogs
+    - name: commit and push
+      run: |
+        git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+        git config --global user.email "${{ secrets.MY_SECRET_EMAIL}}"
+        git add .
+        git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+        git push
